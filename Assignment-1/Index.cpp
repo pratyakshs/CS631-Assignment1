@@ -148,10 +148,22 @@ public:
                     addToLeafNoSplit(key, payload, i, &current);
                 }
                 else{
-                    /*
-                      * TODO: Fill in the required code.
-                      * Hint: You will need to use the function handleLeafSplit
-                      */
+                    // check if all the keys have same value as the inserted one
+                            char nodekeyFirst[keylen(&keytype)];
+                            char nodekeyLast[keylen(&keytype)];
+                            current->getKey(keytype, nodekeyFirst, 0);
+                            current->getKey(keytype, nodekeyLast, current->numkeys-1);
+                            if(*(nodekeyFirst)  ==  *(nodekeyLast)
+                                && *(nodekeyFirst) == *(key)){
+                                        printf("Can't add new keys.\n");    
+                                        return -1;
+                            }
+                            else{
+                                    int allowedKeys = (DATA_SIZE)/ ((keylen(&keytype) + payloadlen) + NODE_OFFSET_SIZE);
+                                    int totalKeys = allowedKeys+1;
+                                    int splitPos = (totalKeys+1)/2;
+                                    handleLeafSplit(key, payload, &current,accessPath, height, i, splitPos);                                
+                            }
                 }
             }
             else
@@ -159,6 +171,7 @@ public:
         }
 
         loadNode(root, rootAddress);
+        //printf("root-data: %s\n", root);
         return 0;
 
     }
@@ -548,7 +561,6 @@ void indexHandlingSample();
 int main() {
     //Sample code to handle indexes.
     indexHandlingSample();
-
     /*
      * Checkout testInserts() and testDups() for initial testing and understanding the LookupIterator API
      * You should create more test cases of your own for correctness checking
@@ -567,6 +579,8 @@ void indexHandlingSample() {
 
     char *filename = "indexomp1.ind";
     Index *index = new Index(filename, &keyType, PAYLOAD_LEN);
+    testDups(index);
+    //index->root->display(keyType);
     delete(index);
 }
 
@@ -576,7 +590,7 @@ void testInserts(Index *index) {
     char *keyN = (char *)calloc(8,1);
     char payL[PAYLOAD_LEN];
 
-    int numInserts = 10;
+    int numInserts = 5;
     for(int i = 0 ; i < numInserts ; i++){
         a = rand()%100;
         printf("inserting %d\n",a);
@@ -610,8 +624,8 @@ void testDups(Index *index) {
     int a;
     int i;
 
-    int testVals[] = {3,3,3,5,4,5,6};
-    int arrSize = 7;
+    int testVals[] = {3,3,3,5,4,5,6,7,8,9,9,4};
+    int arrSize = 12;
     set<int> testValsSet;
 
     cout<<"Starting inserts"<<endl;
@@ -623,6 +637,20 @@ void testDups(Index *index) {
     }
     cout<<"Done inserting"<<endl<<endl;
 
+    cout << "the root: "<<endl;
+    index->root->display(index->keytype);
+    cout<<"----\n";
+
+    char ptr[NODE_OFFSET_SIZE];
+    index->root->getPayload(NODE_OFFSET_SIZE,ptr,0);
+    //printf("PTR: %s\n",(char*)ptr);
+    //char nodekeyz[keylen(&(index->keytype))];
+    ((TreeNode*) ptr)->display(index->keytype);
+    cout << endl<<"----\n";
+
+
+
+/*
     while(!(testValsSet.empty())){
         int curVal = *(testValsSet.begin());
         testValsSet.erase(testValsSet.begin());
@@ -640,5 +668,5 @@ void testDups(Index *index) {
         }
         printf("res %d : %d\n", curVal, count);
         delete(res);
-    }
+    }*/
 }
