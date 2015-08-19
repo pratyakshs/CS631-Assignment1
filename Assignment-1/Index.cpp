@@ -497,15 +497,42 @@ public:
      */
     LookupIter* find(char key[]) {
 
-        if (root == 0) {
-            LookupIter* emptyResult = new LookupIter();
+        LookupIter* emptyResult = new LookupIter();
+        
+        if (root == 0) {    
             printf("BPlus Tree empty.");
             return emptyResult;
         }
 
-        /*
-         * TODO: Fill in code to lookup the index and return an iterator for the results
-         */
+        TreeNode * current = new TreeNode();
+        loadNode(current,rootAddress);
+
+        char nodekey[keylen(&keytype)];
+
+        int i, isLesser;
+        while(current != 0) {
+            current->display(keytype);
+
+            for (i = 0 ; i<current->numkeys ; i++ ) {
+                current->getKey(keytype,nodekey,i);
+                isLesser = compare(nodekey,key,keytype);
+                if ( isLesser == 1 || (isLesser ==0 && current->flag =='c') ){
+                    break;
+                }
+            }
+
+            if (current->flag == 'c') {
+                if (isLesser != 0)  //key not found
+                    return emptyResult;
+
+                //key found, copy payload
+                LookupIter *iter = new LookupIter(key, keytype, current, i, payloadlen);
+                return iter;
+            }
+            else
+                handleNonLeaf(&current, i);
+        }
+        return emptyResult;
     }
 };
 
