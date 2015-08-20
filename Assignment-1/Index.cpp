@@ -600,7 +600,7 @@ public:
 
         int i, isLesser;
         while(current != 0) {
-             current->display(keytype);
+             // current->display(keytype);
 
             for (i = 0 ; i<current->numkeys ; i++ ) {
                 current->getKey(keytype,nodekey,i);
@@ -615,7 +615,7 @@ public:
                     return emptyResult;
 
                 //key found, copy payload
-                LookupIter *iter = new LookupIter(key, keytype, current, i, payloadlen);
+                LookupIter *iter = new LookupIter(key, keytype, current, i-1, payloadlen);
                 return iter;
             }
             else
