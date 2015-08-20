@@ -28,14 +28,15 @@ public:
     /* whether the iterator is empty */
     bool isNull();
 
-    /* return true if iterator can return more elements, false if not*/
+    /* return true if iterator can return more elements to get(), false if not*/
     bool hasNext();
 
     /* advance to the next key. return 0 if successful, -1 if unsuccessful */
     int next();
 
-    /* The next payload value will be loaded in the given char array, and 0 is returned.
-     * If there is no next, then -1 is returned. */
+    /* The payload value corresponding to the current iterator position
+     * will be loaded in the given char array, and 0 is returned.
+     * If the payload cannot be loaded for any reason, return -1. */
     int get(char* payload);
 };
 
