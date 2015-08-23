@@ -121,7 +121,7 @@ public:
      */
     int insert(char key[], char payload[]) {
         if (root == 0) {
-            cout << "Split: N\n";;
+            // cout << "Split: N\n";
             addFirstElement(key, payload);
             return 0;
         }
@@ -147,34 +147,37 @@ public:
             if (current->flag == 'c'){
 
                 //FOR PRINTING
-                cout << "#of keys: " << current->numkeys << endl;
+                // cout << "#of keys: " << current->numkeys << endl;
 
                 if(splitNecessary(current->numkeys + 1, 'c') != 1){
                         
-                        //FOR PRINTING 
-                        cout << "Split : N\n";
-                        char tmpjunk[keylen(&keytype)];
-                        cout << "<Action> Inserting in node ";
-                        int allowedKeys = (DATA_SIZE)/ ((keylen(&keytype) + payloadlen) + NODE_OFFSET_SIZE);
-                        for(int id=0;id<current->numkeys;id++){
-                                current->getKey(keytype, tmpjunk, id); 
-                                cout << Utils::getIntForBytes(tmpjunk) <<" ";
-                        } 
-                        cout << " </Action>" << endl;
+                    // FOR PRINTING
+					{
+					 //    cout << "Split : N\n";
+					 //    char tmpjunk[keylen(&keytype)];
+					 //    cout << "<Action> Inserting in node ";
+					 //    int allowedKeys = (DATA_SIZE)/ ((keylen(&keytype) + payloadlen) + NODE_OFFSET_SIZE);
+					 //    for(int id=0;id<current->numkeys;id++){
+					 //            current->getKey(keytype, tmpjunk, id); 
+					 //            cout << Utils::getIntForBytes(tmpjunk) <<" ";
+					 //    }
+					 //    cout << " </Action>" << endl;
+					}
 
-                        //Add to Leaf
-                        addToLeafNoSplit(key, payload, i, &current);                    
+                    //Add to Leaf
+                    addToLeafNoSplit(key, payload, i, &current);                    
                 }
                 else{
-                            //FOR PRINTING
                             int allowedKeys = (DATA_SIZE)/ ((keylen(&keytype) + payloadlen) + NODE_OFFSET_SIZE);
-                            char tmpjunk[keylen(&keytype)];
-                            cout << "<Action> Inserting in node ";
-                            for(int id=0;id<current->numkeys;id++){
-                                current->getKey(keytype, tmpjunk, id); 
-                                cout << Utils::getIntForBytes(tmpjunk) <<" ";
-                             }           
-                            cout << " </Action>" << endl;
+                            //FOR PRINTING
+                            // char tmpjunk[keylen(&keytype)];
+                            // cout << "<Action> Inserting in node ";
+                            // for(int id=0;id<current->numkeys;id++){
+                            //     current->getKey(keytype, tmpjunk, id); 
+                            //     cout << Utils::getIntForBytes(tmpjunk) <<" ";
+                            //  }           
+                            // cout << " </Action>" << endl;
+
                             //Split leaf
                             char nodekeyCur[allowedKeys+1][keylen(&keytype)]; 
                             int found=0;   
@@ -217,7 +220,11 @@ public:
                                     splitPos = iter;
                                 }
                                 else{
-                                    if(prevLast == Utils::getIntForBytes(key)){
+                                    //EDITED
+                                    if(Utils::getIntForBytes(nodekeyCur[0]) == Utils::getIntForBytes(key)){
+
+                                        //cout << "prevlast: " << prevLast << endl;
+                                        //cout << "key: " << Utils::getIntForBytes(key) <<endl;
                                         printf("Can't add this key.\n");    
                                         return -1;
                                     }
@@ -238,7 +245,7 @@ public:
                                 }
                             }
                             handleLeafSplit(key, payload, &current,accessPath, height, i, splitPos);
-                            cout << "Split: Y\n";
+                            // cout << "Split: Y\n";
                             return 0;
                 }
             }
@@ -585,7 +592,7 @@ public:
      * Fuction to get an iterator for the results.
      */
     LookupIter* find(char key[]) {
-        cout << "finding " << Utils::getIntForBytes(key) <<endl;
+
         LookupIter* emptyResult = new LookupIter();
         
         if (root == 0) {    
@@ -615,7 +622,7 @@ public:
                     return emptyResult;
 
                 //key found, copy payload
-                LookupIter *iter = new LookupIter(key, keytype, current, i-1, payloadlen);
+                LookupIter *iter = new LookupIter(key, keytype, current, i, payloadlen);
                 return iter;
             }
             else
@@ -643,7 +650,6 @@ int main() {
      * We will use a separate set of test cases to evaluate your submission
      */
 
-    cout<<"TODO: Implementation"<<endl;
     return 0;
 }
 
@@ -656,7 +662,6 @@ void indexHandlingSample() {
     char *filename = "indexomp1.ind";
     Index *index = new Index(filename, &keyType, PAYLOAD_LEN);
     testDups(index);
-    //index->root->display(keyType);
     delete(index);
 }
 
@@ -700,8 +705,8 @@ void testDups(Index *index) {
     int a;
     int i;
 
-    int testVals[] = {3,3,3,5,4,4,5,6,6,6,1,2,2,3,3,2,27,3,4};
-    int arrSize = 19;
+    int testVals[] = {-8,-10,7,-2,-20,5,8,7,6,20,19,19,7,6,6,7,7,-20,-40,-21,31,31,33,-20,251,223};
+    int arrSize = 26;
     set<int> testValsSet;
 
     cout<<"Starting inserts"<<endl;
@@ -747,11 +752,19 @@ void testDups(Index *index) {
 
         LookupIter* res = index->find(keyN);
         char payL[PAYLOAD_LEN];
-        int count = 0;
-        while(res->hasNext()){
-            res->next();
-            res->get(payL);
-            count++;
+        int count;
+
+        // EDITED
+        if(res->isNull()){
+            count=0;
+        }
+        else{
+            count = 1;
+            while(res->hasNext()){
+                res->next();
+                res->get(payL);
+                count++;
+            }
         }
         printf("res %d : %d\n", curVal, count);
         delete(res);
