@@ -168,85 +168,85 @@ public:
                     addToLeafNoSplit(key, payload, i, &current);                    
                 }
                 else{
-                            int allowedKeys = (DATA_SIZE)/ ((keylen(&keytype) + payloadlen) + NODE_OFFSET_SIZE);
-                            //FOR PRINTING
-                            // char tmpjunk[keylen(&keytype)];
-                            // cout << "<Action> Inserting in node ";
-                            // for(int id=0;id<current->numkeys;id++){
-                            //     current->getKey(keytype, tmpjunk, id); 
-                            //     cout << Utils::getIntForBytes(tmpjunk) <<" ";
-                            //  }           
-                            // cout << " </Action>" << endl;
+                    int allowedKeys = (DATA_SIZE)/ ((keylen(&keytype) + payloadlen) + NODE_OFFSET_SIZE);
+                    //FOR PRINTING
+                    // char tmpjunk[keylen(&keytype)];
+                    // cout << "<Action> Inserting in node ";
+                    // for(int id=0;id<current->numkeys;id++){
+                    //     current->getKey(keytype, tmpjunk, id);
+                    //     cout << Utils::getIntForBytes(tmpjunk) <<" ";
+                    //  }
+                    // cout << " </Action>" << endl;
 
-                            //Split leaf
-                            char nodekeyCur[allowedKeys+1][keylen(&keytype)]; 
-                            int found=0;   
-                            int dst=0;
-                            int j;
-                            for(j=0;j<current->numkeys;j++){
-                                current->getKey(keytype, nodekeyCur[dst], j);       
-                                if(!found){
-                                    if(Utils::getIntForBytes(nodekeyCur[dst]) >= Utils::getIntForBytes(key)){
-                                       strncpy(nodekeyCur[j],key,keylen(&keytype));
-                                       found=1;
-                                       j--;     
-                                    } 
-                                }
-                                dst++;
-                            }
-                            if(!found) strncpy(nodekeyCur[j],key,keylen(&keytype));
-                            /*cout <<"new leaf: ";
-                            for(int d=0;d<allowedKeys+1;d++){
-                                cout << Utils::getIntForBytes(nodekeyCur[d]) <<" ";  
-                            }
-                            cout << endl;
-                            cout << " added: " << Utils::getIntForBytes(key) << endl;*/
-                            
-                            int splitPos=-1;
-                            int prevLast = Utils::getIntForBytes(nodekeyCur[allowedKeys/2]);
-                            int nextFirst = Utils::getIntForBytes(nodekeyCur[allowedKeys/2 + 1]);
-                            if(prevLast != nextFirst){
-                                splitPos=allowedKeys/2 + 1;
+                    //Split leaf
+                    char nodekeyCur[allowedKeys+1][keylen(&keytype)]; 
+                    int found=0;
+                    int dst=0;
+                    int j;
+                    for(j=0;j<current->numkeys;j++) {
+                        current->getKey(keytype, nodekeyCur[dst], j);
+                        if(!found){
+                            if(Utils::getIntForBytes(nodekeyCur[dst]) >= Utils::getIntForBytes(key)){
+                               strncpy(nodekeyCur[j],key,keylen(&keytype));
+                               found=1;
+                               j--;
+                            } 
+                        }
+                        dst++;
+                    }
+                    if(!found) strncpy(nodekeyCur[j],key,keylen(&keytype));
+                    /*cout <<"new leaf: ";
+                    for(int d=0;d<allowedKeys+1;d++){
+                        cout << Utils::getIntForBytes(nodekeyCur[d]) <<" ";
+                    }
+                    cout << endl;
+                    cout << " added: " << Utils::getIntForBytes(key) << endl;*/
+                    
+                    int splitPos=-1;
+                    int prevLast = Utils::getIntForBytes(nodekeyCur[allowedKeys/2]);
+                    int nextFirst = Utils::getIntForBytes(nodekeyCur[allowedKeys/2 + 1]);
+                    if(prevLast != nextFirst){
+                        splitPos=allowedKeys/2 + 1;
+                    }
+                    else{
+                        int iter = allowedKeys/2 + 1;
+                        while(iter < allowedKeys + 1) {
+                            if(prevLast == Utils::getIntForBytes(nodekeyCur[iter]))
+                                iter++;
+                            else
+                                break;
+                        }
+                        if(iter < allowedKeys + 1){
+                            splitPos = iter;
+                        }
+                        else{
+                        //EDITED
+                            if(Utils::getIntForBytes(nodekeyCur[0]) == Utils::getIntForBytes(key)){
+
+                                //cout << "prevlast: " << prevLast << endl;
+                                //cout << "key: " << Utils::getIntForBytes(key) <<endl;
+                                printf("Can't add this key.\n");    
+                                return -1;
                             }
                             else{
-                                int iter = allowedKeys/2 + 1;
-                                while(iter < allowedKeys + 1) {
+                                int iter = allowedKeys/2;
+                                while(iter >=0 ) {
                                     if(prevLast == Utils::getIntForBytes(nodekeyCur[iter]))
-                                        iter++;
+                                        iter--;
                                     else
                                         break;
                                 }
-                                if(iter < allowedKeys + 1){
-                                    splitPos = iter;
+                                if(iter<0) {
+                                    printf("can't add this keyz.\n");
+                                    return -1;
                                 }
-                                else{
-                                    //EDITED
-                                    if(Utils::getIntForBytes(nodekeyCur[0]) == Utils::getIntForBytes(key)){
-
-                                        //cout << "prevlast: " << prevLast << endl;
-                                        //cout << "key: " << Utils::getIntForBytes(key) <<endl;
-                                        printf("Can't add this key.\n");    
-                                        return -1;
-                                    }
-                                    else{
-                                        int iter = allowedKeys/2;
-                                        while(iter >=0 ) {
-                                            if(prevLast == Utils::getIntForBytes(nodekeyCur[iter]))
-                                                iter--;
-                                            else
-                                                break;
-                                        }
-                                        if(iter<0) {
-                                            printf("can't add this keyz.\n");
-                                            return -1;
-                                        }
-                                        splitPos = iter+1;
-                                    }
-                                }
+                                splitPos = iter+1;
                             }
-                            handleLeafSplit(key, payload, &current,accessPath, height, i, splitPos);
-                            // cout << "Split: Y\n";
-                            return 0;
+                        }
+                    }
+                    handleLeafSplit(key, payload, &current,accessPath, height, i, splitPos);
+                    // cout << "Split: Y\n";
+                    return 0;
                 }
             }
             else

@@ -1,3 +1,24 @@
+Team members:
+Pratham Desai, 12D170001
+Pratyaksh Sharma, 120050019
+
+Implementation of Index::insert()
+ * In the case when the leaf is not full, insert as usual 
+ * If the leaf is full, calculate the position at which to split - to ensure
+   all keys with same value remain in same leaf (after split)
+ * If the above condition can't be met, don't insert the duplicate key
+
+Implementation of LookupIter class
+ * LookupIter::hasNext checks whether `position` has reached the end of the current leaf or 
+   if the next key's value isn't equal to LookupIter::key
+ * LookupIter::next checks hasNext and increments position if hasNext returns true
+ * LookupIter::get returns the payload corresponding to the position `position`
+
+Implementation of Index::find
+ * Same as Index::findFirst, except that it returns a LookupIter* initialized appropriately.
+
+================================================================================
+
 Assignment 1: Handling duplicates in B+-trees
 
 Short description: In this assignment, you will modify an existing implementation of B+-trees to handle duplicates (only insertions and lookup). This is a group assignment (to be done in groups of two).
